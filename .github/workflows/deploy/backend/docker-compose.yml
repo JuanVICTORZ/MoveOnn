@@ -1,0 +1,25 @@
+version: "3.8"
+services:
+  oracle-sim:
+    image: wnameless/oracle-xe-11g:latest
+    environment:
+      - ORACLE_ALLOW_REMOTE=true
+      - ORACLE_PASSWORD=oracle
+    ports:
+      - "1521:1521"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "tnsping || exit 1"]
+      interval: 30s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      - ORACLE_CONN_STRING=//oracle-sim:1521/XE
+      - ORACLE_USER=system
+      - ORACLE_PWD=oracle
+      - OPENAI_API_KEY=
+    ports:
+      - "3000:3000"
+    depends_on:
+      - oracle-sim
